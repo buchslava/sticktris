@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Game</title>
+</head>
+
+<body onload="init();">
+
+	<div id="content">
+		<canvas id="gameCanvas" width="960" height="400" style="background:black;"></canvas>
+	</div>
+
+	<script src="createjs.min.js"></script>
+	<script type="text/javascript" src="board.js"></script>
+
+	<script id="editable">
+		var KEYCODE_ENTER = 13;
+		var KEYCODE_SPACE = 32;
+		var KEYCODE_UP = 38;
+		var KEYCODE_LEFT = 37;
+		var KEYCODE_RIGHT = 39;
+		var KEYCODE_W = 87;
+		var KEYCODE_A = 65;
+		var KEYCODE_D = 68;
+
+		var shootHeld;
+		var lfHeld;
+		var rtHeld;
+		var fwdHeld;
+
+		var canvas;
+		var stage;
+		var board;
+	
+		var messageField;
+
+		document.onkeydown = handleKeyDown;
+		document.onkeyup = handleKeyUp;
+
+		function init() {
+			if (!createjs.Sound.initializeDefaultPlugins()) {
+				document.getElementById("error").style.display = "block";
+				document.getElementById("content").style.display = "none";
+				return;
+			}
+
+			if (createjs.BrowserDetect.isIOS || createjs.BrowserDetect.isAndroid || createjs.BrowserDetect.isBlackberry) {
+				document.getElementById("mobile").style.display = "block";
+				document.getElementById("content").style.display = "none";
+				return;
+			}
+
+			createjs.Ticker.interval = 25;
+            createjs.Ticker.framerate = 2;
+
+			canvas = document.getElementById("gameCanvas");
+			stage = new createjs.Stage(canvas);
+			messageField = new createjs.Text("Click", "bold 12px Arial", "#FFFFFF");
+			messageField.maxWidth = 1000;
+			messageField.textAlign = "center";
+			messageField.textBaseline = "middle";
+			messageField.x = canvas.width / 2;
+			messageField.y = canvas.height / 2;
+			stage.addChild(messageField);
+			stage.update();
+			watchRestart();
+		}
+
+		function watchRestart() {
+			stage.addChild(messageField);
+			stage.update();
+			canvas.onclick = handleClick;
+		}
+
+		function handleClick() {
+			canvas.onclick = null;
+			stage.removeChild(messageField);
+
+			restart();
+		}
+
+		function restart() {
+			stage.removeAllChildren();
+
+			board = new Board();
+			//board.x = 170;
+			//board.y = 20;
+			/*board.x = canvas.width / 2;
+			board.y = canvas.height / 2;*/
+
+			stage.clear();
+			stage.addChild(board);
+
+			if (!createjs.Ticker.hasEventListener("tick")) {
+				createjs.Ticker.addEventListener("tick", tick);
+			}
+		}
+
+		function tick(event) {
+			board.tick(event);
+			stage.update(event);
+		}
+
+		function handleKeyDown(e) {
+			if (!e) {
+				var e = window.event;
+			}
+
+			switch (e.keyCode) {
+				case KEYCODE_SPACE:
+					shootHeld = true;
+					return false;
+				case KEYCODE_A:
+				case KEYCODE_LEFT:
+					lfHeld = true;
+					return false;
+				case KEYCODE_D:
+				case KEYCODE_RIGHT:
+					rtHeld = true;
+					return false;
+				case KEYCODE_W:
+				case KEYCODE_UP:
+					fwdHeld = true;
+					return false;
+				case KEYCODE_ENTER:
+					/*if (canvas.onclick == handleClick) {
+						handleClick();
+					}
+					return false;*/
+					restart();
+			}
+		}
+
+		function handleKeyUp(e) {
+			if (!e) {
+				var e = window.event;
+			}
+			switch (e.keyCode) {
+				case KEYCODE_SPACE:
+					shootHeld = false;
+					break;
+				case KEYCODE_A:
+				case KEYCODE_LEFT:
+					lfHeld = false;
+					break;
+				case KEYCODE_D:
+				case KEYCODE_RIGHT:
+					rtHeld = false;
+					break;
+				case KEYCODE_W:
+				case KEYCODE_UP:
+					fwdHeld = false;
+					break;
+			}
+		}
+
+	</script>
+
+</body>
+
+</html>
